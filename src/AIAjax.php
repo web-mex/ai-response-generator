@@ -10,6 +10,49 @@ require_once(__DIR__ . '/../api/OpenAIClient.php');
 
 class AIAjaxController extends AjaxController {
 
+    private function isDebugLoggingEnabled($cfg) {
+        return !!$cfg->get('debug_request_logging');
+    }
+
+    private function writeDebugRequestLog($cfg, Ticket $ticket, $apiUrl, $model, array $messages) {
+        if (!$this->isDebugLoggingEnabled($cfg))
+            return;
+
+        $payload = array(
+            'model' => (string)$model,
+            'messages' => $messages,
+            'temperature' => 0.2,
+            'max_tokens' => 512,
+        );
+
+        $entry = array(
+            'timestamp' => date('c'),
+            'ticket_id' => (int)$ticket->getId(),
+            'ticket_number' => (string)$ticket->getNumber(),
+            'api_url' => (string)$apiUrl,
+            'payload' => $payload,
+        );
+
+        $logDir = dirname(__DIR__) . '/logs';
+        $logFile = $logDir . '/request-debug.log';
+
+        if (!is_dir($logDir) && !@mkdir($logDir, 0775, true))
+            return;
+
+        if (!is_writable($logDir))
+            @chmod($logDir, 0775);
+
+        if (!is_writable($logDir))
+            return;
+
+        $line = "--- " . date('Y-m-d H:i:s') . " ---\n"
+            . json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+            . "\n\n";
+
+        if (@file_put_contents($logFile, $line, FILE_APPEND) !== false)
+            @chmod($logFile, 0664);
+    }
+
     /**
      * Sanitize thread body to remove passwords and sensitive data
      * Prevents leaking credentials to external API
@@ -107,6 +150,8 @@ class AIAjaxController extends AjaxController {
             $messages[] = array('role' => 'system', 'content' => "Additional knowledge base context:\n".$rag_text);
 
         try {
+            $this->writeDebugRequestLog($cfg, $ticket, $api_url, $model, $messages);
+
             $client = new OpenAIClient($api_url, $api_key);
             $reply = $client->generateResponse($model, $messages);
             if (!$reply)
