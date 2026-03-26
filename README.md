@@ -5,15 +5,18 @@
 
 This plugin adds an AI-powered "Generate Response" button to the agent ticket view in osTicket. It allows agents to generate suggested replies using an OpenAI-compatible API and optionally enriches responses with custom context (RAG content).
 
-This fork includes deployment fixes for osTicket plugin asset loading and UX improvements such as visible loading feedback during response generation.
+This fork includes deployment fixes for osTicket plugin asset loading, UX improvements such as visible loading feedback during response generation, per-response agent notes, request debugging, and configurable API timeouts.
 
 ## Features
 
 - Adds a "Generate AI Response" button to each ticket for agents
 - **Supports multiple plugin instances:** You can add and configure multiple instances of the plugin, each with its own API URL, key, model, and settings. This allows you to use different AI providers or configurations for different teams or workflows.
 - Configurable API URL, API key, and model
+- Configurable API request timeout for slower providers or larger prompts
 - Optional system prompt and response template
+- Optional per-response agent notes to steer the generated answer
 - Supports pasting additional context (RAG content) to enrich AI responses
+- Optional sanitized debug request logging for troubleshooting
 - Secure API key storage (with PasswordField)
 
 ## Requirements
@@ -30,13 +33,16 @@ This fork includes deployment fixes for osTicket plugin asset loading and UX imp
     - Set the API URL (e.g., `https://api.openai.com/v1`)
     - Enter your API key
     - Specify the model (e.g., `gpt-4.1-mini`)
+  - (Optional) Increase the API timeout for slower models
     - (Optional) Add a system prompt or response template
     - (Optional) Paste RAG content to provide extra context for AI replies
+  - (Optional) Enable debug request logging for sanitized payload inspection
 5. Save changes.
 
 ## Usage
 
 - In the agent panel, open any ticket.
+- (Optional) Add agent-specific notes above the AI action to guide the response.
 - Click the **Generate AI Response** button in the ticket actions menu.
 - The plugin will call the configured API and insert the suggested reply into the response box.
 
@@ -45,8 +51,11 @@ This fork includes deployment fixes for osTicket plugin asset loading and UX imp
 - **API URL**: The endpoint for your OpenAI-compatible API.
 - **API Key**: The key used for authentication (stored securely).
 - **Model Name**: The model to use (e.g., `gpt-4.1-mini`).
+- **API Request Timeout (seconds)**: Maximum wait time for the AI response.
+- **Debug Request Logging**: Writes a sanitized request payload to a local debug log.
 - **AI System Prompt**: (Optional) Custom instructions for the AI.
 - **Response Template**: (Optional) Template for formatting the AI response.
+- **Agent Notes**: (Optional, per request) Short instructions entered by the agent before generation.
 - **RAG Content**: (Optional) Paste additional context to enrich AI responses.
 
 ## Security
@@ -65,9 +74,19 @@ This fork includes deployment fixes for osTicket plugin asset loading and UX imp
 - This provides conversation history for the AI to understand the ticket
 - Large ticket histories are automatically capped to prevent API overhead
 
+**Agent Notes:**
+- Agents can enter temporary instructions per response, for example tone, priority, or specific facts to mention
+- These notes are appended to the system instruction for the current request only
+
 **API Key Storage:**
 - API keys are stored in the osTicket database using the PasswordField encryption
 - They are not visible in normal admin views and are only exposed when explicitly editing the configuration
+
+**Debug Request Logging (optional):**
+- Enable Debug Request Logging in plugin settings to write sanitized request payloads for troubleshooting
+- Log file path: include/plugins/ai-response-generator/logs/request-debug.log
+- The log includes model, messages, and metadata (ticket id/number, timestamp)
+- The Authorization header/API key is not written into this file
 
 ## Example screenshots
 
