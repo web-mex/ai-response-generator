@@ -7,10 +7,12 @@
 class OpenAIClient {
     private $baseUrl;
     private $apiKey;
+    private $timeout;
 
-    function __construct($baseUrl, $apiKey=null) {
+    function __construct($baseUrl, $apiKey=null, $timeout=45) {
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->apiKey = $apiKey;
+        $this->timeout = max(5, (int)$timeout);
     }
 
     /**
@@ -40,7 +42,8 @@ class OpenAIClient {
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
         $resp = curl_exec($ch);

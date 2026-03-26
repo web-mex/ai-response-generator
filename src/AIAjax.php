@@ -109,6 +109,7 @@ class AIAjaxController extends AjaxController {
         $api_url = rtrim($cfg->get('api_url'), '/');
         $api_key = $cfg->get('api_key');
         $model   = $cfg->get('model');
+        $timeout = max(5, (int)($cfg->get('request_timeout_seconds') ?: 45));
 
         if (!$api_url || !$model)
             Http::response(400, $this->encode(array('ok' => false, 'error' => __('Missing API URL or model'))));
@@ -152,7 +153,7 @@ class AIAjaxController extends AjaxController {
         try {
             $this->writeDebugRequestLog($cfg, $ticket, $api_url, $model, $messages);
 
-            $client = new OpenAIClient($api_url, $api_key);
+            $client = new OpenAIClient($api_url, $api_key, $timeout);
             $reply = $client->generateResponse($model, $messages);
             if (!$reply)
                 throw new Exception(__('Empty response from model'));

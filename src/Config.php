@@ -38,6 +38,20 @@ class AIResponseGeneratorPluginConfig extends PluginConfig {
             'configuration' => array('size' => 80, 'length' => 255),
         ));
 
+        $fields['request_timeout_seconds'] = new TextboxField(array(
+            'label' => __('API Request Timeout (seconds)'),
+            'required' => false,
+            'default' => '45',
+            'hint' => __('Maximum time to wait for the AI API response. Increase this for slower models or larger prompts.'),
+            'configuration' => array('size' => 10, 'length' => 5),
+        ));
+
+        $fields['debug_request_logging'] = new BooleanField(array(
+            'label' => __('Debug Request Logging'),
+            'default' => false,
+            'hint' => __('When enabled, the sanitized AI request payload is written to include/plugins/ai-response-generator/logs/request-debug.log for troubleshooting.'),
+        ));
+
         $fields['system_prompt'] = new TextareaField(array(
             'label' => __('AI System Prompt'),
             'required' => false,
