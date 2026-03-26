@@ -1,10 +1,14 @@
 # AI Response Generator Plugin for osTicket
 
-Fork maintained by Stefan Schneider / Web-Mex.
+**Fork maintained by Stefan Schneider / Web-Mex.**
 
-This plugin adds an AI-powered "Generate Response" button to the agent ticket view in osTicket. It allows agents to generate suggested replies using an OpenAI-compatible API and optionally enriches responses with custom context (RAG content).
+**Original work by Mateusz Hajder** ([mhajder/ai-response-generator](https://github.com/mhajder/ai-response-generator))
 
 This fork includes deployment fixes for osTicket plugin asset loading and UX improvements such as visible loading feedback during response generation.
+
+---
+
+This plugin adds an AI-powered "Generate Response" button to the agent ticket view in osTicket. It allows agents to generate suggested replies using an OpenAI-compatible API and optionally enriches responses with custom context (RAG content).
 
 ## Features
 
@@ -66,4 +70,6 @@ This fork includes deployment fixes for osTicket plugin asset loading and UX imp
 
 MIT License
 
-Note: The original license and upstream copyright notice are intentionally retained.
+Original work by Mateusz Hajder; modifications by Stefan Schneider / Web-Mex.
+
+This fork is provided under the same MIT License as the original project, which permits commercial use, modification, and redistribution with proper attribution.
