@@ -1,0 +1,38 @@
+# AI Response Generator — web-accessible files
+#
+# The parent include/.htaccess denies all HTTP access.
+# This override allows the assets/ directory (JS, CSS) and any
+# API endpoint to pass through to the browser/client.
+#
+# For Nginx, allow access to this plugin directory in your server block.
+
+# Apache 2.4+
+<IfModule mod_authz_core.c>
+    Require all denied
+
+    # Allow static assets (JS, CSS)
+    <FilesMatch "\.(js|css|png|gif|jpg|svg|woff|woff2|ttf|eot)$">
+        Require all granted
+    </FilesMatch>
+
+    # Allow API endpoint if present
+    <Files "index.php">
+        Require all granted
+    </Files>
+</IfModule>
+
+# Apache 2.2 (legacy)
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from all
+
+    <FilesMatch "\.(js|css|png|gif|jpg|svg|woff|woff2|ttf|eot)$">
+        Order Allow,Deny
+        Allow from all
+    </FilesMatch>
+
+    <Files "index.php">
+        Order Allow,Deny
+        Allow from all
+    </Files>
+</IfModule>
