@@ -62,6 +62,13 @@ class AIAjaxController extends AjaxController {
 
         // Append instruction for the model (from config or default)
         $system = trim((string)$cfg->get('system_prompt')) ?: "You are a helpful support agent. Draft a concise, professional reply. Quote the relevant ticket details when appropriate. Keep HTML minimal.";
+        
+        // Add agent notes/remarks if provided
+        $agent_notes = trim((string)($_POST['agent_notes'] ?? ''));
+        if ($agent_notes) {
+            $system .= "\n\nAGENT'S SPECIFIC INSTRUCTIONS FOR THIS RESPONSE:\n" . $agent_notes;
+        }
+        
         array_unshift($messages, array('role' => 'system', 'content' => $system));
 
         // Load RAG documents content (if any)

@@ -1,4 +1,21 @@
 (function () {
+  function initAgentNotesField() {
+    // Inject notes field after first AI button or into ticket actions
+    var $firstBtn = $('a.ai-generate-reply').first();
+    if (!$firstBtn.length) return;
+
+    // Only inject once
+    if ($('#ai-agent-notes').length) return;
+
+    var $wrapper = $('<div class="ai-agent-notes-wrapper">' +
+      '<label for="ai-agent-notes">Ergänzende Anweisungen für die KI:</label>' +
+      '<textarea id="ai-agent-notes" placeholder="z.B. \'Betone die Kulanzregelung\' oder \'Nennen Sie den Wartungstermin am 15.04.\'"></textarea>' +
+      '</div>');
+
+    // Insert before the button's parent (likely a list item)
+    $firstBtn.closest('li').before($wrapper);
+  }
+
   function getStatusBox() {
     var $box = $('#ai-response-status');
     if ($box.length) return $box;
@@ -76,10 +93,22 @@
     setLoading($a, true);
     var url = (window.AIResponseGen && window.AIResponseGen.ajaxEndpoint) || 'ajax.php/ai/response';
 
+    // Get agent notes if present
+    var $notes = $('#ai-agent-notes');
+    var notes = $notes.length ? $notes.val().trim() : '';
+
+    var ajaxData = { 
+      ticket_id: tid, 
+      instance_id: $a.data('instance-id') || ''
+    };
+    if (notes) {
+      ajaxData.agent_notes = notes;
+    }
+
     $.ajax({
       url: url,
       method: 'POST',
-      data: { ticket_id: tid, instance_id: $a.data('instance-id') || '' },
+      data: ajaxData,
       dataType: 'json'
     }).done(function (resp) {
       if (resp && resp.ok) {
@@ -101,5 +130,13 @@
     });
 
     return false;
+  });
+
+  // Initialize agent notes field on page load and when DOM changes
+  $(document).ready(function () {
+    initAgentNotesField();
+  });
+  $(document).on('ajaxsuccessor', 'body', function () {
+    initAgentNotesField();
   });
 })();
