@@ -10,7 +10,7 @@ class AIResponseGeneratorPluginConfig extends PluginConfig {
     function getFormOptions() {
         return array(
             'title' => __('AI Response Generator Settings'),
-            'instructions' => __('Configure the connection to your OpenAI-compatible server.'),
+            'instructions' => __('Configure the connection to your OpenAI-compatible server. SECURITY NOTE: This plugin automatically redacts passwords, API keys, credit card numbers, and other sensitive data from the ticket history before sending it to the API.'),
         );
     }
 

@@ -10,6 +10,32 @@ require_once(__DIR__ . '/../api/OpenAIClient.php');
 
 class AIAjaxController extends AjaxController {
 
+    /**
+     * Sanitize thread body to remove passwords and sensitive data
+     * Prevents leaking credentials to external API
+     */
+    private function sanitizeThreadBody($body) {
+        // Remove content in square brackets like [password: xyz] or [PIN: 1234]
+        $body = preg_replace('/\[(?:password|pwd|pin|token|key|secret|api[_\s]key|auth|credentials?)\s*:?\s*[^\]]*\]/i', 
+                            '[REDACTED: sensitive data]', $body);
+        
+        // Remove common password patterns: "password: xyz" (matching until punctuation/newline)
+        $body = preg_replace('/(password|pwd|passphrase|pass)\s*[=:]\s*[^\s\n\r,.]*/i', 
+                            '$1=[REDACTED]', $body);
+        
+        // Remove API keys and tokens (common patterns)
+        $body = preg_replace('/(api[_\s]key|token|bearer)\s*[=:]\s*[a-z0-9\-_.]*[a-z0-9]{10,}/i', 
+                            '$1=[REDACTED]', $body);
+        
+        // Remove credit card patterns (basic)
+        $body = preg_replace('/\b\d{4}[\s\-]?\d{4}[\s\-]?\d{4}[\s\-]?\d{4}\b/', '[REDACTED: CC number]', $body);
+        
+        // Remove social security / tax ID patterns
+        $body = preg_replace('/\b\d{2}\s*\d{2}\s*\d{5}\b/', '[REDACTED: ID number]', $body);
+        
+        return $body;
+    }
+
     function generate() {
         global $thisstaff;
         $this->staffOnly();
@@ -54,6 +80,10 @@ class AIAjaxController extends AjaxController {
             if ($count++ > 20) break;
             $type = $E->getType();
             $body = ThreadEntryBody::clean($E->getBody());
+            
+            // SECURITY: Sanitize sensitive data (passwords, tokens, credit cards, etc.)
+            $body = $this->sanitizeThreadBody($body);
+            
             $who  = $E->getPoster();
             $who  = is_object($who) ? $who->getName() : 'User';
             $role = ($type == 'M') ? 'user' : 'assistant';
